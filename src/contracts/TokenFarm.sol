@@ -1,6 +1,15 @@
 pragma solidity ^0.5.0;
 
+import "./DappToken.sol";
+import "./DaiToken.sol";
+
 contract TokenFarm {
-    // All cods goes here
     string public name = 'Digital World DeFi Bank';
+    DappToken public dappToken;
+    DaiToken public daiToken;
+
+    constructor(DappToken _dappToken, DaiToken _daiToken) public {
+        dappToken = _dappToken;
+        daiToken = _daiToken;
+    }
 }
