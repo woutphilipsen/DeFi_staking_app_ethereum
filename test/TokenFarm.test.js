@@ -80,6 +80,16 @@ contract('TokenFarm', ([owner, investor]) => {
             
             result = await tokenFarm.isStaking(investor)
             assert.equal(result.toString(), 'true', 'Investor staking status correct after staking')
+
+            // Issue tokens
+            await tokenFarm.issueTokens({ from: owner })
+
+            // Check balances after issuance
+            result = await dappToken.balanceOf(investor)
+            assert.equal(result.toString(), tokens('100'), 'Investor Dapp Token wallet balance correct after issuance')
+
+            // Ensure that only owner can issue tokens
+            await tokenFarm.issueTokens({ from: investor }).should.be.rejected;
         })
     })
 
