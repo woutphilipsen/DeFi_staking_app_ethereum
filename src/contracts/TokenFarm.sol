@@ -4,7 +4,7 @@ import "./DappToken.sol";
 import "./DaiToken.sol";
 
 contract TokenFarm {
-    string public name = 'Digital World DeFi Bank';
+    string public name = 'Dapp Token Farm';
     DappToken public dappToken;
     DaiToken public daiToken;
 
