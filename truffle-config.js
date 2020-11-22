@@ -9,6 +9,7 @@ module.exports = {
       network_id: "*" // Match any network id
     },
   },
+  // Change where the contracts go. We want to provide this on client side
   contracts_directory: './src/contracts/',
   contracts_build_directory: './src/abis/',
   compilers: {
