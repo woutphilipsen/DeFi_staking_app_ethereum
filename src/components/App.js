@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import Main from './Main'
 import Web3 from 'web3'
 import DaiToken from '../abis/DaiToken.json'
 import DappToken from '../abis/DappToken.json'
@@ -25,59 +26,45 @@ class App extends Component {
     const networkId = await web3.eth.net.getId()
     // console.log(networkId);
 
-    // Load DaiToken from abis/DaiToken.json
+    // Load DaiToken
     const daiTokenData = DaiToken.networks[networkId]
-    // If address exists create a web3 version of this if not alert to window
     if (daiTokenData) {
-      // create a javascript version of this smart contract
       const daiToken = new web3.eth.Contract(DaiToken.abi, daiTokenData.address)
-      // Update state, dai token gets stored here
       this.setState({ daiToken })
 
-      // Fetch balance for this address
       let daiTokenBalance = await daiToken.methods.balanceOf(this.state.account).call()
       this.setState({ daiTokenBalance: daiTokenBalance.toString() })
 
-      // Check if code works
       // console.log({ balance: daiTokenBalance });
     } else {
       window.alert('DaiToken contract not deployed to detected network.')
     }
     
-    // Load DappToken from abis/DappToken.json
+    // Load DappToken
     const dappTokenData = DappToken.networks[networkId]
-    // If address exists create a web3 version of this if not alert to window
     if (dappTokenData) {
-      // create a javascript version of this smart contract
       const dappToken = new web3.eth.Contract(DappToken.abi, dappTokenData.address)
-      // Update state, dai token gets stored here
       this.setState({ dappToken })
 
-      // Fetch balance for this address
       let dappTokenBalance = await dappToken.methods.balanceOf(this.state.account).call()
       this.setState({ dappTokenBalance: dappTokenBalance.toString() })
 
-      // Check if code works
       // console.log({ balance: dappTokenBalance });
     } else {
       window.alert('DaiToken contract not deployed to detected network.')
     }
     
-    // Load TokenFarm from abis/TokenFarm.json
+    // Load TokenFarm
     const tokenFarmData = TokenFarm.networks[networkId]
-    // If address exists create a web3 version of this if not alert to window
+
     if (tokenFarmData) {
-      // create a javascript version of this smart contract
       const tokenFarm = new web3.eth.Contract(TokenFarm.abi, tokenFarmData.address)
-      // Update state, dai token gets stored here
       this.setState({ tokenFarm })
 
-      // Fetch staking balance for this address
       let stakingBalance = await tokenFarm.methods.stakingBalance(this.state.account).call()
       this.setState({ stakingBalance: stakingBalance.toString() })
 
-      // Check if code works
-       console.log({ stakingBalance: stakingBalance });
+      // console.log({ stakingBalance: stakingBalance });
     } else {
       window.alert('DaiToken contract not deployed to detected network.')
     }
@@ -99,6 +86,24 @@ class App extends Component {
     this.setState({ loading: false })
   }
 
+  stakeTokens = (amount) => {
+    this.setState({ loading: true })
+    // interact with blockchain
+    this.state.daiToken.methods.approve(this.state.tokenFarm._address, amount).send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.state.tokenFarm.methods.stakeTokens(amount).send({ from: this.state.account }).on('transactionHash', (hash) => {
+        this.setState({ loading: false })
+      })
+    })
+  }
+  
+  unstakeTokens = (amount) => {
+    this.setState({ loading: true })
+    // interact with blockchain
+    this.state.tokenFarm.methods.unstakeTokens().send({ from: this.state.account }).on('transactionHash', (hash) => {
+      this.setState({ loading: false })
+    })
+  }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -114,6 +119,19 @@ class App extends Component {
   }
 
   render() {
+    let content
+    if(this.state.loading) {
+      content = <p id="loader" className="text-center">Loading...</p>
+    } else {
+      content = <Main 
+        daiTokenBalance = {this.state.daiTokenBalance}
+        dappTokenBalance = {this.state.dappTokenBalance}
+        stakingBalance = {this.state.stakingBalance}
+        stakeTokens = {this.stakeTokens}
+        unstakeTokens = {this.unstakeTokens}
+      />
+    }
+
     return (
       <div>
         <Navbar account={this.state.account} />
@@ -128,7 +146,7 @@ class App extends Component {
                 >
                 </a>
 
-                <h1>Hello, DefiWorld!</h1>
+                { content }
 
               </div>
             </main>
